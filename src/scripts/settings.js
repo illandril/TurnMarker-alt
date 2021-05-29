@@ -1,7 +1,7 @@
 import {Marker} from './marker.js';
 import {MarkerAnimation} from './markeranimation.js';
 import {SettingsForm} from './settingsForm.js';
-import {modName, getNextTurn} from './utils.js';
+import {modName, getNextTurn, getPlaceables} from './utils.js';
 
 const version = 'tm-version';
 const interval = 'interval';
@@ -420,7 +420,7 @@ export class Settings {
             type: Boolean,
             default: true,
             onChange: shouldAnimate => {
-                if (!game.paused && shouldAnimate && canvas.tiles.placeables.find(t => t.data.flags.turnMarker == true)) {
+                if (!game.paused && shouldAnimate && getPlaceables().find(t => t.data.flags.turnMarker == true)) {
                     MarkerAnimation.startAnimation("turnmarker");
                 } else {
                     MarkerAnimation.stopAnimation("turnmarker");
@@ -436,7 +436,7 @@ export class Settings {
             type: Boolean,
             default: true,
             onChange: shouldAnimate => {
-                if (!game.paused && shouldAnimate && canvas.tiles.placeables.find(t => t.data.flags.deckMarker == true)) {
+                if (!game.paused && shouldAnimate && getPlaceables().find(t => t.data.flags.deckMarker == true)) {
                     MarkerAnimation.startAnimation("deckmarker");
                 } else {
                     MarkerAnimation.stopAnimation("deckmarker");

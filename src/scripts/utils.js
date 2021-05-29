@@ -29,9 +29,9 @@ export function findTokenById(tokenId) {
  * Use for actions that need to be done by a GM but by only 1 GM
  */
 export function firstGM() {
-    for (let user of game.users.entities) {
+    for (let user of game.users.contents) {
         if (user.data.role >= 4 && user.active) {
-            return user.data._id;
+            return user.data.id;
         }
     }
     return undefined;
@@ -48,4 +48,8 @@ export function getNextTurn(combat){
         nextTurn = 0;
     }
     return nextTurn;
+}
+
+export function getPlaceables() {
+    return canvas.background && canvas.background.placeables || canvas.tiles && canvas.tiles.placeables;
 }

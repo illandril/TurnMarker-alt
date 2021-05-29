@@ -1,4 +1,5 @@
 import {Settings} from './settings.js';
+import {getPlaceables} from './utils.js';
 
 export class MarkerAnimation {
     /**
@@ -43,13 +44,13 @@ export class MarkerAnimation {
         let tile;
         switch (marker_type) {
             case "turnmarker":
-                tile = canvas.tiles.placeables.find(t => t.data.flags.turnMarker == true);
+                tile = getPlaceables().find(t => t.data.flags.turnMarker == true);
                 break;
             case "deckmarker":
-                tile = canvas.tiles.placeables.find(t => t.data.flags.deckMarker == true);
+                tile = getPlaceables().find(t => t.data.flags.deckMarker == true);
                 break;
             default:
-                tile = canvas.tiles.placeables.find(t => t.data.flags.turnMarker == true);
+                tile = getPlaceables().find(t => t.data.flags.turnMarker == true);
         }
 
         if (tile && tile.data.img) {

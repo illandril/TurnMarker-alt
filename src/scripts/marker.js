@@ -1,6 +1,6 @@
 import {MarkerAnimation} from './markeranimation.js';
 import {Settings} from './settings.js';
-import {findTokenById, Flags, FlagScope, socketAction, socketName} from './utils.js';
+import {findTokenById, Flags, FlagScope, socketAction, socketName, getPlaceables} from './utils.js';
 
 /**
  * Provides functionality for creating, moving, and animating the turn marker
@@ -12,15 +12,15 @@ export class Marker {
      */
     static async deleteTurnMarker() {
         const to_delete = canvas.scene.getEmbeddedCollection('Tile')
-            .filter(tile => tile.flags.turnMarker)
-            .map(tile => tile._id);
+            .filter(tile => tile.data.flags.turnMarker)
+            .map(tile => tile.id);
         if (!game.user.isGM) {
             game.socket.emit(socketName, {
                 mode: socketAction.deleteTurnMarker,
                 tileData: to_delete.data
             });
         } else {
-            await canvas.scene.deleteEmbeddedEntity('Tile', to_delete);
+            await canvas.scene.deleteEmbeddedDocuments('Tile', to_delete);
         }
     }
 
@@ -29,15 +29,15 @@ export class Marker {
      */
     static async deleteOnDeckMarker() {
         const to_delete = canvas.scene.getEmbeddedCollection('Tile')
-            .filter(tile => tile.flags.deckMarker)
-            .map(tile => tile._id);
+            .filter(tile => tile.data.flags.deckMarker)
+            .map(tile => tile.id);
         if (!game.user.isGM) {
             game.socket.emit(socketName, {
                 mode: socketAction.deleteOnDeckMarker,
                 tileData: to_delete.data
             });
         } else {
-            await canvas.scene.deleteEmbeddedEntity('Tile', to_delete);
+            await canvas.scene.deleteEmbeddedDocuments('Tile', to_delete);
         }
     }
 
@@ -56,7 +56,7 @@ export class Marker {
                 let dims = this.getImageDimensions(token, false, "turnmarker");
                 let center = this.getImageLocation(token, false, "turnmarker");
 
-                let newTile = new Tile({
+                let tile = await canvas.scene.createEmbeddedEntity('Tile', {
                     img: Settings.getImagePath(),
                     width: dims.w,
                     height: dims.h,
@@ -69,9 +69,7 @@ export class Marker {
                     flags: {turnMarker: true}
                 });
 
-                let tile = await canvas.scene.createEmbeddedEntity('Tile', newTile.data);
-
-                return tile._id;
+                return tile.id;
             } else {
                 return null;
             }
@@ -113,8 +111,8 @@ export class Marker {
      */
     static async deleteStartMarker() {
         const to_delete = canvas.scene.getEmbeddedCollection('Tile')
-            .filter(tile => tile.flags.startMarker)
-            .map(tile => tile._id);
+            .filter(tile => tile.data.flags.startMarker)
+            .map(tile => tile.id);
         if (!game.user.isGM) {
             game.socket.emit(socketName, {
                 mode: socketAction.deleteStartMarker,
@@ -168,7 +166,7 @@ export class Marker {
         let center = this.getImageLocation(token, false, marker_type);
 
         await canvas.scene.updateEmbeddedEntity('Tile', {
-            _id: markerId,
+            id: markerId,
             width: dims.w,
             height: dims.h,
             x: center.x,
@@ -191,12 +189,12 @@ export class Marker {
      */
     static async updateImagePath() {
         if (game.user.isGM) {
-            let tile = canvas.tiles.placeables.find(t => t.data.flags.turnMarker == true);
+            let tile = getPlaceables().find(t => t.data.flags.turnMarker == true);
             if (tile) {
-                await canvas.scene.updateEmbeddedEntity('Tile', {
+                await canvas.scene.updateEmbeddedDocuments('Tile', [{
                     _id: tile.id,
                     img: Settings.getImagePath()
-                });
+                }]);
             }
         }
     }
@@ -208,10 +206,10 @@ export class Marker {
         if (game.user.isGM) {
             let tile = canvas.tiles.placeables.find(t => t.data.flags.deckMarker == true);
             if (tile) {
-                await canvas.scene.updateEmbeddedEntity('Tile', {
+                await canvas.scene.updateEmbeddedDocuments('Tile', [{
                     _id: tile.id,
                     img: Settings.getOnDeckImagePath()
-                });
+                }]);
             }
         }
     }
